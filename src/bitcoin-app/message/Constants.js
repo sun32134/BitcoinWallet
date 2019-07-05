@@ -1,0 +1,9 @@
+module.exports={
+    REMAIN_LEN:1,
+    NUM_LEN:7,
+    FLAG_LEN:1,
+    DATA_LEN:(247),
+    TOTAL_LEN:(16),
+    LEN:(256),
+    PADDING:'0'
+}

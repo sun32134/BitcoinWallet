@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Wallet</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta content="" name="description" />
+    <meta content="" name="author" />
+    <!-- BEGIN GLOBAL MANDATORY STYLES -->
+
+	  <link href="media/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+	  <link href="media/css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css"/>
+
+	  <link href="media/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+
+	  <link href="media/css/style-metro.css" rel="stylesheet" type="text/css"/>
+
+	  <link href="media/css/style.css" rel="stylesheet" type="text/css"/>
+
+	  <link href="media/css/style-responsive.css" rel="stylesheet" type="text/css"/>
+
+	  <link href="media/css/default.css" rel="stylesheet" type="text/css" id="style_color"/>
+
+	  <link href="media/css/uniform.default.css" rel="stylesheet" type="text/css"/>
+
+    <!-- END GLOBAL MANDATORY STYLES -->
+    
+    <!-- BEGIN PAGE LEVEL STYLES -->
+
+	  <link href="media/css/error.css" rel="stylesheet" type="text/css"/>
+
+    <!-- END PAGE LEVEL STYLES -->
+    
+    <link rel="shortcut icon" href="media/image/favicon.ico" />
+    
+  </head>
+  <body>
+      <div class="page-content">
+          <div class="portlet-body form">
+            
+                                            <!-- BEGIN FORM-->
+            
+        <form action="#" class="form-horizontal" id="add-wallet-form">
+            
+             <div class="control-group">
+            
+                   <label class="control-label">Wallet Url</label>
+            
+                        <div class="controls">
+            
+                             <input id='wallet-url' type="button" class="btn btn-block"/>
+            
+                             <span class="help-inline">input wallet url</span>
+            
+                        </div>
+            
+            </div>
+
+            <div class="control-group">
+            
+                    <label class="control-label">Password</label>
+             
+                         <div class="controls">
+             
+                              <input type="text" class="span6 m-wrap" id="wallet-password" >
+             
+                              <span class="help-inline">input your password</span>
+             
+                         </div>
+             
+             </div>
+            
+            <div class="form-actions">
+            
+                <button id='add-wallet-save' class="btn blue">Save</button>
+            
+                 <!--button id='add-wallet-cancel' type="button" class="btn">Cancel</button>-->
+            
+             </div>
+            
+        </form>
+            
+        <!-- END FORM-->
+            
+    </div> 
+          
+      </div>
+           
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>   
+    <script src="media/js/jquery-1.10.1.min.js" type="text/javascript"></script>
+
+	  <script src="media/js/jquery-migrate-1.2.1.min.js" type="text/javascript"></script>
+
+	  <!-- IMPORTANT! Load jquery-ui-1.10.1.custom.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip -->
+
+	  <script src="media/js/jquery-ui-1.10.1.custom.min.js" type="text/javascript"></script>      
+
+	  <script src="media/js/bootstrap.min.js" type="text/javascript"></script>
+
+    <!--[if lt IE 9]>
+      
+      
+
+	  <script src="media/js/excanvas.min.js"></script>
+
+	  <script src="media/js/respond.min.js"></script>  
+
+	  <![endif]-->   
+    <script src="media/js/jquery.slimscroll.min.js" type="text/javascript"></script>
+
+	  <script src="media/js/jquery.blockui.min.js" type="text/javascript"></script>  
+
+	  <script src="media/js/jquery.cookie.min.js" type="text/javascript"></script>
+
+	  <script src="media/js/jquery.uniform.min.js" type="text/javascript" ></script>
+
+	  <!-- END CORE PLUGINS -->
+
+    <script src="media/js/app.js"></script>
+    <script>if (window.module) module = window.module;</script>      
+
+	  <script>
+
+		  jQuery(document).ready(function() {    
+
+		   App.init();
+
+		  });
+
+	  </script>
+	<script type="text/javascript">  var _gaq = _gaq || [];  _gaq.push(['_setAccount', 'UA-37564768-1']);  _gaq.push(['_setDomainName', 'keenthemes.com']);  _gaq.push(['_setAllowLinker', true]);  _gaq.push(['_trackPageview']);  (function() {    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;    ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);  })();</script></body>
+
+<script>
+  require('../src/addWalletRender.js')
+</script>
+  </body>
+</html>
