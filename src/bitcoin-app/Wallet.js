@@ -160,14 +160,17 @@ Wallet.prototype.sendMsgSecret=function(msgArray, fee, from, changeAddr){
     })
 }
 
+// TODO: Test this
 Wallet.prototype.loopSignAndBroadTx=function(msgArray, i, from, to, changeAddr, fee, wif, txids){
     return new Promise((res,rej)=>{
-        this.buildTransaction(Constants.BTC, from, to, changeAddr, fee).then((txb)=>{
+        var inputLen = msgArray.length - i > 5? 5: msgArray.length - i; 
+        this.buildTransactionUp(from, to, changeAddr, fee, inputLen).then((txb)=>{
             var tx=this.signTransaction(txb, wif, msgArray, i);
             var k=tx.k;
             var txHash=tx.txHash;
+            console.log(txHash)
             this.broadTransaction(txHash).then(async (txid)=>{
-                // console.log(txid);
+                console.log(txid);
                 txids.push(txid);
                 if(k===msgArray.length){
                     // res();
@@ -193,8 +196,8 @@ Wallet.prototype.loopSignAndBroadTx=function(msgArray, i, from, to, changeAddr, 
     })
 }
 
-Wallet.prototype.buildTransaction=function(btc, from, to, changeAddr, feePerByte){
-    var satoshis = Math.round(btc * Constants.Satoshis);
+// Update version for build transaction
+Wallet.prototype.buildTransactionUp = function(from, to, changeAddr, feePerByte, numOfSign){
     return new Promise((res,rej)=>{
         if(!this.account){
             rej("init account first");
@@ -204,23 +207,60 @@ Wallet.prototype.buildTransaction=function(btc, from, to, changeAddr, feePerByte
             var current = 0;
             var fee = 2 * 34 * feePerByte + 10;
             const change = Math.round(Constants.changeFee * Constants.Satoshis)
+            if(utxos.length < numOfSign){
+                rej('not enough utxos in address:' + from);
+            }
+            var count = 0;
             for(const utx of utxos){
                 txb.addInput(utx.tx_hash_big_endian,utx.tx_output_n);
                 current += utx.value;
-                fee += feePerByte * 148
-                if(current >= (satoshis + change + fee)) break;
+                fee += feePerByte * 148;
+                count += 1;
+                if(count == numOfSign && current >= (change + fee)) break;
             }
-            if(current < (satoshis + change + fee)){
+            if(current < (change + fee)){
                 rej('not enough money in address:'+from);
             }
-            const moreOutput=current- (satoshis + fee + change);
+            console.log("tx fee: " + fee)
+            const moreOutput=current- (fee + change);
             if(moreOutput > 0){
-                satoshis = satoshis + moreOutput;
+                txb.addOutput(to, moreOutput);
             }
-            txb.addOutput(to, satoshis);
             txb.addOutput(changeAddr, change);
             res(txb);
         });
+    })
+}
+
+Wallet.prototype.buildTransaction=function(btc, from, to, changeAddr, feePerByte){
+    var satoshis = Math.round(btc * Constants.Satoshis);
+    return new Promise((res,rej)=>{
+        // if(!this.account){
+        //     rej("init account first");
+        // }
+        // bnet.getUnspentOutputs(from).then((utxos)=>{
+        //     const txb = new bitcoin.TransactionBuilder(Network.current);
+        //     var current = 0;
+        //     var fee = 2 * 34 * feePerByte + 10;
+        //     const change = Math.round(Constants.changeFee * Constants.Satoshis)
+        //     for(const utx of utxos){
+        //         txb.addInput(utx.tx_hash_big_endian,utx.tx_output_n);
+        //         current += utx.value;
+        //         fee += feePerByte * 148
+        //         if(current >= (satoshis + change + fee)) break;
+        //     }
+        //     if(current < (satoshis + change + fee)){
+        //         rej('not enough money in address:'+from);
+        //     }
+        //     const moreOutput=current- (satoshis + fee + change);
+        //     if(moreOutput > 0){
+        //         satoshis = satoshis + moreOutput;
+        //     }
+        //     txb.addOutput(to, satoshis);
+        //     txb.addOutput(changeAddr, change);
+        //     res(txb);
+        // });
+        res("function outdated")
     })
    
 }
@@ -251,6 +291,7 @@ Wallet.prototype.broadTransaction=function(rawTx){
             // console.log(txid);
             res(txid);
         }).catch((err) => {
+            console.log("broadcast failed" + JSON.stringify(err));
             rej(err);
         });
     })
@@ -338,7 +379,7 @@ Wallet.prototype.buildSendToAddressTx = function(from, to, btc, feePerByte){
             for(const utx of utxos){
                 txb.addInput(utx.tx_hash_big_endian,utx.tx_output_n);
                 current += utx.value;
-                fee += feePerByte * 180
+                fee += feePerByte * 134
                 if(current >= (satoshis + fee)) break;
             }
             

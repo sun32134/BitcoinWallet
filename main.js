@@ -28,7 +28,11 @@ let msgWindow
 
 let createWalletByWordlistWindow
 
-// 存储添加进客户端的钱包文�?
+let depositBTCWindow
+
+let checkBalanceWindow
+
+// 存储添加进客户端的钱包文�??
 // i => wallet object
 var walletlist=[];
 
@@ -44,7 +48,9 @@ var g_sendWalletID;
 
 var g_msg;
 
-// 周期函数，周期性检查是否有新交易，�?15秒检查一�?
+var closeable = 0
+
+// 周期函数，周期性检查是否有新交易，�??15秒检查一�??
 var rule = new schedule.RecurrenceRule();
 var times = [];
 for(var i=1; i<60; i = i + 15){
@@ -97,7 +103,7 @@ ipc.on('wallet-addWalletResponse', (event, message) => {
         var handlerlist = [];
 
         // 初始信息
-        handlerlist.push(null); // 第一个监控地址不使�?
+        handlerlist.push(null); // 第一个监控地址不使�??
         checkAddresses.forEach((checkAddress)=>{
           watchAddr.set(checkAddress, 
             {
@@ -293,7 +299,7 @@ ipc.on('msg-sendMsgBtnClick', function(event, message){
     }
     sendWindow.webContents.send('msg-sendDetails', JSON.stringify(obj))
   })
-  // sendWindow.webContents.openDevTools();
+  sendWindow.webContents.openDevTools();
   sendWindow.on('ready-to-show', ()=>{
     sendWindow.show()
   })
@@ -343,6 +349,34 @@ ipc.on('service-selectWalletSavePosition', () => {
   }
 })
 
+// TODO: deposit coins
+ipc.on('service-depositCoins', () => {
+  depositBTCWindow = new BrowserWindow({width:400, height:500, parent: mainWindow});
+  depositBTCWindow.loadFile('./pages/depositBTC.html');
+  depositBTCWindow.on('close', () => { 
+    depositBTCWindow = null 
+    mainWindow.show()
+  })
+  depositBTCWindow.webContents.openDevTools();
+  depositBTCWindow.on('ready-to-show', ()=>{
+    depositBTCWindow.show()
+  })
+})
+
+// check balance
+ipc.on('service-checkBalance', () => {
+  checkBalanceWindow = new BrowserWindow({width:400, height:500, parent: mainWindow});
+  // checkBalanceWindow.webContents.openDevTools();
+  checkBalanceWindow.on('close', () => { 
+    checkBalanceWindow = null 
+    mainWindow.show()
+  })
+  checkBalanceWindow.loadFile('./pages/checkBalance.html');
+  checkBalanceWindow.on('ready-to-show', ()=>{
+    checkBalanceWindow.show()
+  })
+})
+
 ipc.on('error', (event, message) => {
   var err = JSON.parse(`${message}`);
   console.log(err);
@@ -360,12 +394,25 @@ function sendMessage(obj){
   messageHandler.fileArrayToMsgArray();
   messageArray=messageHandler.messageArray;
   console.log("length: "+messageHandler.messageArray.length);
-  // 发送交�?
+  
+  // TODO: 发送信息显示提示, id设置为Obj.fromAddr
+  showSendTransactionBox(obj.fromAddr);
+  closeable++;
+  if(closeable == 1){
+    mainWindow.setClosable(false);
+  }
   wallet.sendMsgSecret(messageArray, obj.fee, obj.fromAddr, obj.changeAddr).then(()=>{
-    // 提示用户发送交易完�?
+    // 提示用户发送交易完成
     dialog.showMessageBox({type:'info', message: "Send Message Finished"})
+    // TODO: 发送信息关闭提示
+    closeable--;
+    if(closeable == 0){
+        mainWindow.setClosable(true);
+    }
+    
   }).catch((err)=>{
     dialog.showErrorBox("Error", err);
+    closeable = true
   });
 }
 
@@ -375,9 +422,9 @@ function createWindow () {
 
   // and load the index.html of the app.
   mainWindow.loadFile('./pages/index.html')
-
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
+    
   })
 
   // Open the DevTools.
@@ -390,6 +437,8 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
+  
 }
 
 // This method will be called when Electron has finished
@@ -419,10 +468,10 @@ app.on('activate', function () {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
-// 新消息提�?
+// 新消息提�??
 
 /**
- * 同步在钱包列表中的钱�?
+ * 同步在钱包列表中的钱�??
  */
 function asyncWallets(){
   if(checkingWatchingAddressNumberIsZero()){
@@ -534,4 +583,14 @@ function newFinishedMsg(walletID, i, address){
   }
   console.log('new finish address: ' + address)
   watchAddrlist[walletID].delete(address);
+}
+
+// TODO: test this
+function showSendTransactionBox(fromAddr){
+
+}
+
+// TODO: test this
+function deleteSendTransactionBox(fromAddr){
+
 }

@@ -63,8 +63,8 @@ function getUtxos(){
 }
 
 function checkUtxos(){
-    bnet.getUnspentOutputs('1BYUfuwdLRt2V1tV8EGhNj7WTc31E3Dw5q').then((utxos) => {
-        var ret = bnet.checkUtxos(3, 16, utxos, 0.000001);
+    bnet.getUnspentOutputs('1CqzggZ1dwMgPW4iKHggwbLEh7pEV2rEu5').then((utxos) => {
+        var ret = bnet.checkUtxosUp(26, 16, utxos);
         console.log(ret);
     })
 }
@@ -88,6 +88,6 @@ function getRawTx(){
 // getUtxos();
 // getFee()
 // discoverMsg();
-// checkUtxos();
+checkUtxos();
 // getAddressTxs()
 // getRawTx();

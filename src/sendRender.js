@@ -51,7 +51,7 @@ sendMsgBtn.addEventListener('click',()=>{
                 g_utxos = []
                 console.log('[Error]: get utxos failed');
             }
-            var ret = bnet.checkUtxos(length, fee, g_utxos, Constants.BTC);
+            var ret = bnet.checkUtxos(length, fee, g_utxos);
             if(ret === true){
                 obj.fee = fee
                 ipcRenderer.send('msg-startSendMsg', JSON.stringify(obj));

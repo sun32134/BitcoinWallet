@@ -13,9 +13,12 @@ var Util = require('./Utils');
 var Network=function(){
 }
 
+// TODO: change fee per byte to lowest
 Network.prototype.getFee = function() {
     return new Promise((res,rej)=>{
         fly.get('https://bitcoinfees.earn.com/api/v1/fees/recommended').then((value) => {
+            // {"fastestFee":20,"halfHourFee":16,"hourFee":2}
+            // res(value.data.fastestFee);
             res(value.data.hourFee);
         }).catch(() => {
             console.log('[Error]: caught error ar get fee per byte, using default fee instead');
@@ -55,18 +58,19 @@ Network.prototype.discoverMsg=function(addresses){
     })
 }
 
-// 广播交易
+// TODO: 广播交易
 Network.prototype.broadcast=function(rawtx){
     return new Promise((res,rej)=>{
-        fly.post("https://api.blockcypher.com/v1/btc/main/txs/push",{
-            tx:rawtx
-        }).then((value)=>{
-            console.log(value.data.tx.hash);
-            res(value.data);
-        }).catch((err)=>{
-            console.log('[Error]: caught error at broadcast transaction');
-            rej(err);
-        });
+        // fly.post("https://api.blockcypher.com/v1/btc/main/txs/push",{
+        //     tx:rawtx
+        // }).then((value)=>{
+        //     console.log(value.data.tx.hash);
+        //     res(value.data);
+        // }).catch((err)=>{
+        //     console.log('[Error]: caught error at broadcast transaction');
+        //     rej(err);
+        // });
+        res("ok");
     })
 }
 
@@ -85,36 +89,37 @@ Network.prototype.getUnspentOutputs=function(address){
     })    
 }
 
-// 检查现有的UTXO是否足够发送秘密消息，如果不够，缺少多少
-Network.prototype.checkUtxos = function(length, feePerByte, utxos, btc) {
+// 函数已过期
+Network.prototype.checkUtxos = function(length, feePerByte, utxos) {
     var i =0;
-    const satoshis = Math.round(btc * Constants.Satoshis);
-    while(i < length){
-        var current = 0;
-        var flag = false;
-        var fee = 2 * 34 * feePerByte + 10;
-        const change = Math.round(Constants.changeFee * Constants.Satoshis)
-        var count = 0;
-        utxos.some((utx) => {
-            current += utx.value;
-            i++;
-            count ++;
-            fee += feePerByte * 148
-            if(current >= (satoshis + change + fee)){
-                flag = true;
-                return true;
-            } 
-        })
-        if(flag === false){
-            // 计算还需要多少UTXO才能发完
-            i = i - utxos.length;
-            return (length-i) + 1
-        }
-        else{
-            utxos = utxos.slice(count, utxos.length);
-        }
-    }
+    // while(i < length){
+    //     var current = 0;
+    //     var flag = false;
+    //     var fee = 2 * 34 * feePerByte + 10;
+    //     const change = Math.round(Constants.changeFee * Constants.Satoshis)
+    //     var count = 0;
+    //     var left = length - i > 5? 5: length-i;
+    //     utxos.some((utx) => {
+    //         current += utx.value;
+    //         i++;
+    //         count ++;
+    //         fee += feePerByte * 148
+    //         if(count == left && current >= (change + fee)){
+    //             flag = true;
+    //             return true;
+    //         } 
+    //     })
+    //     if(flag === false){
+    //         // 计算还需要多少UTXO才能发完
+    //         i = i - utxos.length;
+    //         return (length-i) + 1
+    //     }
+    //     else{
+    //         utxos = utxos.slice(count, utxos.length);
+    //     }
+    // }
     return true;
+    
 }
 
 // 查找对应地址新交易
@@ -201,6 +206,11 @@ Network.prototype.getBalanceBatch = function(addresses){
             rej(err);
         })  
     })
+}
+
+// TODO: check network status
+Network.prototype.heartbeat = function(){
+
 }
 
 Network.current=bitcoin.networks.bitcoin;
