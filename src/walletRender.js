@@ -22,6 +22,14 @@ ipcRenderer.on('wallet-getNewMsg', (event, message) => {
   updateAddress(obj.walletID, obj.address);
 })
 
+ipcRenderer.on('wallet-showAllertBox', function(){
+  showSendTransactionBox()
+})
+
+ipcRenderer.on('wallet-deleteAllertBox', function(){
+  deleteSendTransactionBox()
+})
+
 function insertNewRow(obj){
   var tableRef=document.getElementById('walletTable').getElementsByTagName('tbody')[0];
   var newRow=tableRef.insertRow(tableRef.rows.length);
@@ -64,7 +72,7 @@ function insertNewRow(obj){
     var rowIndex = row.rowIndex;
     var obj = {}
     obj.walletID = rowIndex - 1;
-    // TODO: 通知主函数进行发送消息
+    // 通知主函数进行发送消息
     ipcRenderer.send('msg-sendMsgBtnClick', JSON.stringify(obj))    
   })
   operaCell.appendChild(send);
@@ -76,7 +84,7 @@ function insertNewRow(obj){
   historyBtn.textContent = 'history';
   historyBtn.addEventListener('click', function(){
     var rowIndex = historyBtn.parentNode.parentNode.rowIndex;
-    // TODO: 显示钱包历史信息
+    // 显示钱包历史信息
     var obj ={
       walletID: rowIndex - 1
     }
@@ -103,3 +111,15 @@ var addWalletBtn = document.getElementById('add-wallet');
 addWalletBtn.addEventListener('click', () => {
   ipcRenderer.send('wallet-addWalletBtnClick');
 })
+
+// test this
+function showSendTransactionBox(){
+  var allertBox = document.getElementById('allert');
+  allertBox.hidden = false
+}
+
+// test this
+function deleteSendTransactionBox(){
+  var allertBox = document.getElementById('allert');
+  allertBox.hidden = true
+}

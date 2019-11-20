@@ -168,7 +168,7 @@ Wallet.prototype.loopSignAndBroadTx=function(msgArray, i, from, to, changeAddr, 
             var tx=this.signTransaction(txb, wif, msgArray, i);
             var k=tx.k;
             var txHash=tx.txHash;
-            console.log(txHash)
+            console.log("txhash: " + txHash)
             this.broadTransaction(txHash).then(async (txid)=>{
                 console.log(txid);
                 txids.push(txid);

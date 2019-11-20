@@ -56,11 +56,3 @@ tx.ins.forEach(function(input, i){
 // }).catch((err)=>{
 //     throw err;
 // })
-
-// TODO 组装交易
-
-// TODO 对交易签名
-
-// TODO 发送交易
-
-// TODO 查找交易

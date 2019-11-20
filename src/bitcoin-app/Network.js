@@ -89,7 +89,7 @@ Network.prototype.getUnspentOutputs=function(address){
     })    
 }
 
-// 函数已过期
+// TODO: 检查是否具有足够余额发送消息
 Network.prototype.checkUtxos = function(length, feePerByte, utxos) {
     var i =0;
     // while(i < length){

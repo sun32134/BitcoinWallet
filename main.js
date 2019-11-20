@@ -299,7 +299,7 @@ ipc.on('msg-sendMsgBtnClick', function(event, message){
     }
     sendWindow.webContents.send('msg-sendDetails', JSON.stringify(obj))
   })
-  sendWindow.webContents.openDevTools();
+  // sendWindow.webContents.openDevTools();
   sendWindow.on('ready-to-show', ()=>{
     sendWindow.show()
   })
@@ -395,19 +395,20 @@ function sendMessage(obj){
   messageArray=messageHandler.messageArray;
   console.log("length: "+messageHandler.messageArray.length);
   
-  // TODO: 发送信息显示提示, id设置为Obj.fromAddr
-  showSendTransactionBox(obj.fromAddr);
+  // 发送信息显示提示
   closeable++;
   if(closeable == 1){
     mainWindow.setClosable(false);
+    mainWindow.webContents.send('wallet-showAllertBox')
   }
   wallet.sendMsgSecret(messageArray, obj.fee, obj.fromAddr, obj.changeAddr).then(()=>{
     // 提示用户发送交易完成
     dialog.showMessageBox({type:'info', message: "Send Message Finished"})
-    // TODO: 发送信息关闭提示
+    // 发送信息关闭提示
     closeable--;
     if(closeable == 0){
         mainWindow.setClosable(true);
+        mainWindow.webContents.send('wallet-deleteAllertBox')
     }
     
   }).catch((err)=>{
@@ -419,7 +420,7 @@ function sendMessage(obj){
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 1000, height: 850})
-
+  // mainWindow.webContents.openDevTools();
   // and load the index.html of the app.
   mainWindow.loadFile('./pages/index.html')
   mainWindow.once('ready-to-show', () => {
@@ -583,14 +584,4 @@ function newFinishedMsg(walletID, i, address){
   }
   console.log('new finish address: ' + address)
   watchAddrlist[walletID].delete(address);
-}
-
-// TODO: test this
-function showSendTransactionBox(fromAddr){
-
-}
-
-// TODO: test this
-function deleteSendTransactionBox(fromAddr){
-
 }
