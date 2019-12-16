@@ -302,14 +302,13 @@ Wallet.prototype.discoverMsg=function(){
     for(var i=0;i<20;i++){
         interAddrs.push(this.account.nextChainAddress(1));
     }
-    // console.log(interAddrs)
     return new Promise((res, rej)=>{
-        bnet.discoverMsg(interAddrs).then((obj)=>{
-            // console.log(obj);
+        bnet.discoverMsg(interAddrs).then(async (obj)=>{
             if(obj.flag){
-                this.discoverMsg().then(()=>{
-                    res();
-                });
+                // FIXME: this may need to be tested
+                await this.discoverMsg()
+                Util.sleep(1000)
+                res()
             }else{
                 for(var i=0;i<20-obj.num;i++){
                    this.account.chains[1].pop();
@@ -350,6 +349,49 @@ Wallet.prototype.getK=function(from, txHex){
         } 
     })
     return kArray;  
+}
+
+// 测试获取K的优化方法
+Wallet.prototype.getKUp = function(from, version, inputs, outputs){
+    if(!this.account){
+        console.log('init account first');
+    }
+    var kArray=[];
+    var node=this.account.chains[0].derive(from);
+    var wif=node.toWIF();
+    var key=bitcoin.ECPair.fromWIF(wif, Network.current);
+    var txb = this.buildTxFromInputOutput(version, inputs, outputs)
+    inputs.some((input, i) => {
+        const p2pkh=bitcoin.payments.p2pkh({pubkey:key.publicKey,input:input.script})
+        const ss=bitcoin.script.signature.decode(p2pkh.signature);
+        const hash=txb.__tx.hashForSignature(i,p2pkh.output,ss.hashType);
+        // console.log(key.verify(hash, ss.signature));
+        var resK = key.getK(hash, ss.signature);
+        // // console.log(resK.toBuffer().toString('hex'))
+        var msg = new Message();
+        msg.recover(resK);
+        if(msg.isLast()){
+            kArray.push(resK);
+            return true;
+        }
+        else{
+            kArray.push(resK);
+        } 
+    })
+    return kArray;  
+}
+
+Wallet.prototype.buildTxFromInputOutput = function(version, inputs, outputs){
+    var txb = new bitcoin.TransactionBuilder()
+    txb.setVersion(version)
+    inputs.forEach(input => {
+        txb.addInput(input.prev_hash, input.output_index)
+    })
+
+    outputs.forEach(output => {
+        txb.addOutput(output.addresses[0], output.value)
+    })
+    return txb
 }
 
 Wallet.prototype.sendToAddress = function (from, to, btc, wif){

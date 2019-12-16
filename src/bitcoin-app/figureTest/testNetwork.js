@@ -70,17 +70,32 @@ function checkUtxos(){
 }
 
 function getAddressTxs(){
-    bnet.getAddressTxs("1GCBamxaJqGnUdfVSvVdTRCptqtkNUfuYp", 26).then((value)=>{
+    bnet.getAddressTxsUp("1GCBamxaJqGnUdfVSvVdTRCptqtkNUfuYp", 170).then((value)=>{
         console.log(value)
     }).catch((err) => {
         console.log(err);
     })
 }
 
-function getRawTx(){
-    bnet.getRawTx('ef8123b0b79c461bb1aa61b4ae4013e331ce77a34f8f277ac78eee96432432fa').then((value) => {
-       console.log(value);
+async function getRawTx(){
+    await bnet.getRawTxUp('ef8123b0b79c461bb1aa61b4ae4013e331ce77a34f8f277ac78eee96432432fa').then((value) => {
+        console.log(1)
     })
+    console.log(2)
+}
+
+function getVaildTx(){
+    bnet.getVaildTx("1GCBamxaJqGnUdfVSvVdTRCptqtkNUfuYp", 170).then(txhashList =>{
+        console.log(txhashList)
+    })
+}
+
+async function getBaidu(){
+    await bnet.getBaidu().then(data => {
+        // console.log(data)
+        console.log(1)
+    })
+    console.log(2)
 }
 
 // testGetUnSpent();
@@ -88,6 +103,8 @@ function getRawTx(){
 // getUtxos();
 // getFee()
 // discoverMsg();
-checkUtxos();
+// checkUtxos();
 // getAddressTxs()
 // getRawTx();
+getVaildTx()
+// getBaidu()

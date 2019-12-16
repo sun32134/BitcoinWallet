@@ -30,6 +30,7 @@ tx.ins.forEach(function(input, i){
     const p2pkh=bitcoin.payments.p2pkh({pubkey:alice.publicKey,input:input.script})
     console.log(p2pkh.signature);
     const ss=bitcoin.script.signature.decode(p2pkh.signature);
+    console.log(ss.hashType)
     const hash=tx.hashForSignature(i,p2pkh.output,ss.hashType);
     console.log(alice.verify(hash, ss.signature));
     var resK = alice.getK(hash, ss.signature);

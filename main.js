@@ -9,6 +9,7 @@ var schedule = require('node-schedule')
 const MessageHandler = require('./src/bitcoin-app/message/messageHandler')
 const CryptLib = require('cryptlib')
 const asynWalletUtil = require('./asyncWalletUtil')
+const Utils = require('./src/bitcoin-app/Utils')
 
 var bnet = new Network();
 
@@ -50,14 +51,15 @@ var g_msg;
 
 var closeable = 0
 
-// 周期函数，周期性检查是否有新交易，�??15秒检查一�??
+// 周期函数，周期性检查是否有新交易，每30秒检查一次
 var rule = new schedule.RecurrenceRule();
-var times = [];
-for(var i=1; i<60; i = i + 15){
-  times.push(i);
-}
-rule.second = times;
-var j = schedule.scheduleJob(rule, function(){
+// var times = [];
+// for(var i= 0; i < 60; i = i + 30){
+//   times.push(i);
+// }
+// rule.second = times;
+rule.minute=new schedule.Range(0, 59, 2);
+schedule.scheduleJob(rule, function(){
   asyncWallets();
 });
 
@@ -357,7 +359,7 @@ ipc.on('service-depositCoins', () => {
     depositBTCWindow = null 
     mainWindow.show()
   })
-  depositBTCWindow.webContents.openDevTools();
+  // depositBTCWindow.webContents.openDevTools();
   depositBTCWindow.on('ready-to-show', ()=>{
     depositBTCWindow.show()
   })
@@ -482,19 +484,20 @@ function asyncWallets(){
   watchAddrlist.forEach(async(addressBalanceMap, walletIndex) => {
     var watchAddresses = asynWalletUtil.getWatchAddresses(addressBalanceMap);
     var balanceInfoMap = await asynWalletUtil.getThisMonentBanalce(watchAddresses);
-    balanceInfoMap.forEach(async (balanceInfo, address) => { 
+    for (var item of balanceInfoMap.entries()) {
+      var address = item[0]
+      var balanceInfo = item[1]
       var old_balanceInfo = addressBalanceMap.get(address);
       if(asynWalletUtil.checkUpdatedBalance(balanceInfo, old_balanceInfo)){
-        console.log('new transaction');
         try{
           await asyncTransaction(walletIndex, old_balanceInfo, address);
           updateBalanceInfo(balanceInfo, address, addressBalanceMap);
-        }
-        catch(err){
-          console.log(err);
+        }catch(err){
+          console.log(err.message)
         }
       }
-    })
+      await Utils.sleep(Constants.SMALL_WAITING_TIME)
+    }
   })
 }
 
@@ -508,17 +511,12 @@ async function asyncTransaction(walletIndex, old_balanceInfo, address){
     updateMessageHandler(walletIndex, i);
     updateWalletWatchingAddress(walletIndex);
   }
-  var newRawTransactions = await asynWalletUtil.getUpdatedRawTransactions(address, old_balanceInfo.n_tx);
-  receiveMessage(walletIndex, newRawTransactions, i);
+  var newTransactions = await asynWalletUtil.getUpdatedTransactionsUp(address, old_balanceInfo.n_tx);
+  receiveMessage(walletIndex, newTransactions, i);
 }
 
 function checkingWatchingAddressNumberIsZero(){
-  if(watchAddrlist.length === 0){
-    return true;
-  }
-  else{
-    return false;
-  }
+  return watchAddrlist.length === 0
 }
 
 function updateBalanceInfo(balanceInfo, address, addressBalanceMap){
@@ -557,14 +555,16 @@ function updateMessageHandler(walletIndex, i){
   }
 }
 
-function receiveMessage(walletIndex, newRawTransactions, i){
+function receiveMessage(walletIndex, txsList, i){
   var handlerlist = msghandlerlist[walletIndex];
   var handler = handlerlist[i];
   var wallet = walletlist[walletIndex];
   var from = wallet.account.chains[0].addresses[ i - 1 ];
   // console.log('[Info]: receive message')
-  newRawTransactions.forEach((rawTx) => {
-    var kArray = wallet.getK(from, rawTx);
+  txsList.forEach((tx) => {
+    var version = tx.ver
+    var inputs = asynWalletUtil.getTxInputs(tx.inputs)
+    var kArray = wallet.getKUp(from, version, inputs, tx.outputs);
     // console.log('[Info]: get k');
     kArray.forEach((k) => {
         handler.receiveMessage(k);

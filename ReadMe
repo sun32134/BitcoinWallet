@@ -1,0 +1,2 @@
+electron-rebuild tiny-secp256k1
+npm run packager

@@ -6,6 +6,10 @@ module.exports={
     Decimals:8,
     BTC:0.00001,
     changeFee:0.00001,
+    BTCPerTx: 0.0001,
+
+    WAITING_TIME: 5000,
+    SMALL_WAITING_TIME: 3000,
 
     NEW_TXS:1,
     NEW_CLIENT:2,

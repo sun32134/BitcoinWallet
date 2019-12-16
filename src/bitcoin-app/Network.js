@@ -61,16 +61,16 @@ Network.prototype.discoverMsg=function(addresses){
 // TODO: 广播交易
 Network.prototype.broadcast=function(rawtx){
     return new Promise((res,rej)=>{
-        // fly.post("https://api.blockcypher.com/v1/btc/main/txs/push",{
-        //     tx:rawtx
-        // }).then((value)=>{
-        //     console.log(value.data.tx.hash);
-        //     res(value.data);
-        // }).catch((err)=>{
-        //     console.log('[Error]: caught error at broadcast transaction');
-        //     rej(err);
-        // });
-        res("ok");
+        fly.post("https://api.blockcypher.com/v1/btc/main/txs/push",{
+            tx:rawtx
+        }).then((value)=>{
+            console.log(value.data.tx.hash);
+            res(value.data);
+        }).catch((err)=>{
+            console.log('[Error]: caught error at broadcast transaction');
+            rej(err);
+        });
+        // res("ok");
     })
 }
 
@@ -83,7 +83,6 @@ Network.prototype.getUnspentOutputs=function(address){
             var sortedUtxos = Util.sortUtxos(utxos);
             res(sortedUtxos);
         }).catch(()=>{
-            console.log('[Info]: found 0 utxo for address:' + address);
             res(utxos);
         })
     })    
@@ -92,89 +91,77 @@ Network.prototype.getUnspentOutputs=function(address){
 // TODO: 检查是否具有足够余额发送消息
 Network.prototype.checkUtxos = function(length, feePerByte, utxos) {
     var i =0;
-    // while(i < length){
-    //     var current = 0;
-    //     var flag = false;
-    //     var fee = 2 * 34 * feePerByte + 10;
-    //     const change = Math.round(Constants.changeFee * Constants.Satoshis)
-    //     var count = 0;
-    //     var left = length - i > 5? 5: length-i;
-    //     utxos.some((utx) => {
-    //         current += utx.value;
-    //         i++;
-    //         count ++;
-    //         fee += feePerByte * 148
-    //         if(count == left && current >= (change + fee)){
-    //             flag = true;
-    //             return true;
-    //         } 
-    //     })
-    //     if(flag === false){
-    //         // 计算还需要多少UTXO才能发完
-    //         i = i - utxos.length;
-    //         return (length-i) + 1
-    //     }
-    //     else{
-    //         utxos = utxos.slice(count, utxos.length);
-    //     }
-    // }
+    while(i < length){
+        var current = 0;
+        var flag = false;
+        var fee = 2 * 34 * feePerByte + 10;
+        const change = Math.round(Constants.changeFee * Constants.Satoshis)
+        var count = 0;
+        var left = length - i > 5? 5: length-i;
+        utxos.some((utx) => {
+            current += utx.value;
+            i++;
+            count ++;
+            fee += feePerByte * 148
+            if(count == left && current >= (change + fee)){
+                flag = true;
+                return true;
+            } 
+        })
+        if(flag === false){
+            // 计算还需要多少UTXO才能发完
+            i = i - utxos.length;
+            return (length-i) + 1
+        }
+        else{
+            utxos = utxos.slice(count, utxos.length);
+        }
+    }
     return true;
     
 }
 
-// 查找对应地址新交易
-Network.prototype.getAddressTxs = function (toAddress, old_n_tx) {
+Network.prototype.getBaidu = function(){
     return new Promise((res, rej) => {
-        fly.get('/rawaddr/'+toAddress).then((value) => {
+        fly.get('http://www.baidu.com').then(data => {
+            res(data)
+        })
+    })
+}
+
+// 获得地址新增的交易
+Network.prototype.getVaildTx = function(toAddress, old_n_tx){
+    return new Promise((res, rej) => {
+        fly.get('http://api.blockcypher.com/v1/btc/main/addrs/'+ toAddress + "/full").then(value => {
             var ret = value.data;
             var txs = ret.txs;
-            var txhashlist = [];
-            var newTxCount = ret.n_tx - old_n_tx;
+            var txsList = [];
+            var newTxCount = ret.final_n_tx - old_n_tx;
             if(newTxCount <= 0){
                 console.log('[Error]: newTxCount < 0, did not find new transaction!');
-                rej(err);
+                return '[Error]: newTxCount < 0, did not find new transaction!'
             }
             txs.some((tx, index) => {
                 if(index >= newTxCount){
                     return true;
                 }
-                tx.out.some((output) => {
-                    if(output.addr === toAddress){
-                        txhashlist.push(tx.hash);
-                        return true;
-                    }
-                })
+                txsList.push(tx)
             });
-            var _this = this;
-            Util.loopPromise(txhashlist, function(txhash){
-                return new Promise((res, rej) => {
-                    _this.getRawTx(txhash).then((rawtx) => {
-                        res(rawtx);
-                    }).catch((err) => {
-                        console.log('[Error]: caught error at get raw transaction');
-                        rej(err);
-                    })
-                })
-            }).then((rawtxs) => {
-                res(rawtxs);
-            }).catch((err) => {
-                console.log('[Error]: caught error at get raw transaction for txhash');
-                rej(err);
-            })
-        }).catch((err) => {
-            console.log('[Error]: caught error at get address transaction!');
-            rej(err);
+            res(txsList)
+        }).catch(err => {
+            console.log(err.message)
+            rej(err)
         })
     })
 }
 
-Network.prototype.getRawTx = function (txid) {
+Network.prototype.getRawTxUp = function(txid) {
     return new Promise((res, rej) => {
-        fly.get('/rawtx/'+txid+'?format=hex').then((value) => {
-            res(value.data);
+        fly.get('http://api.blockcypher.com/v1/btc/main/txs/' + txid + '?includeHex=true').then((value) => {
+            res(value.data.hex);
         }).catch((err) => {
             console.log('[Error]: caught error at get raw transaction for ' + txid);
-            rej(err);
+            rej(err.message);
         })
     })
 }

@@ -1,12 +1,13 @@
 var Wallet=require('../Wallet');
-var wallet = new Wallet('D:/wallet/wallet.db')
+var wallet = new Wallet('D:/wallet/wallet6.db')
 var MessageHandler = require('../message/messageHandler')
+var Utils=require('../Utils');
 var BN = require('bn.js')
 
 function sendToAddress(){
     var btc=0.0001;
-    var from="155eWnpFra3GjnFFGPfx2m3VuuV9Ro28fi";
-    var to = "1CqzggZ1dwMgPW4iKHggwbLEh7pEV2rEu5";
+    var from="13HhyDCzNDVsEJsWkRmVmC2KiHaxbEdoeS";
+    var to = "15vQEhQzD4SEdCLe9g1XJE99Vne1nrdxoo";
     var numberOfUtxo = 1;
 
     // wallet.loadFromFile('hello world').then(()=>{
@@ -27,14 +28,14 @@ function sendToAddress(){
         const node=wallet.account.getChain(0).derive(from);
         const wif=node.toWIF();
         console.log(wif)
-        // for(var i = 0; i < numberOfUtxo; i++){
-        //     await wallet.sendToAddress(from, to, btc, wif);
-        // }
-        // await sleep(1000);
+        for(var i = 0; i < numberOfUtxo; i++){
+            await wallet.sendToAddress(from, to, btc, wif);
+        }
+        await sleep(1000);
     })
 }
 
-sendToAddress()
+// sendToAddress()
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -141,5 +142,53 @@ function testWalletRecover(){
     })
 }
 
+function testWalletRecoverUp(){
+    var inputs = []
+    var outputs = []
+    var input1 = {
+        "prev_hash": "676268791dafca32cfee869c1b8b6dec35b19aa7fa09d94ab2f410acc0cfc1ce",
+        "output_index": 1,
+        "script": Buffer.from("483045022100e7f88f9ae8c1fb0525fb356daece635af1f145b5e11a7683fbc06a917c006e95022043f2d180b83f814ada830da14bd4385aee32f3c59325714a8fd1440abf326b18012103acbd90e8666ffce2825a80ac5b8900bc1baff3f0ba9b68b1d0308a3aabb555ea", 'hex'),
+        "output_value": 10000,
+        "sequence": 4294967295,
+        "addresses": [
+          "1BHx9WyULfaXT5MVddavhtNts5dkxVuMHK"
+        ],
+        "script_type": "pay-to-pubkey-hash",
+        "age": 565479
+      }
+    var output1 = {
+        "value": 8126,
+        "script": "76a914a787f943d66b0979df5558f6ad794d65a55325c288ac",
+        "spent_by": "9f148c174aca47fe3c3a9c161ba5098f41f0e8b052dec04b78f88730104bc504",
+        "addresses": [
+            "1GGpjetz7XUJaf4bRQGp6BS37ZLssF8f69"
+        ],
+        "script_type": "pay-to-pubkey-hash"
+    }
+    var output2 = {
+        "value": 1000,
+        "script": "76a914a2ea0691b2e9b926f687af797f66a245e9e21aa988ac",
+        "addresses": [
+            "1FrQpTwZpFtbejvkeJyrrsw1Q99kKGn1ms"
+        ],
+        "script_type": "pay-to-pubkey-hash"
+    }
+    inputs.push(input1)
+    outputs.push(output1)
+    outputs.push(output2)
+    wallet.loadFromFile('hello world').then(()=>{
+        wallet.discoverMsg().then(async () => {
+            wallet.account.nextChainAddress(1);
+            while(wallet.account.getChain(0).k < wallet.account.getChain(1).k){
+                wallet.account.nextChainAddress(0);
+            }
+            var from = "1BHx9WyULfaXT5MVddavhtNts5dkxVuMHK"
+            var kArray = wallet.getKUp(from, 2, inputs, outputs)
+        })
+    })
+}
+
 // testWalletBuild()
 // testWalletRecover();
+testWalletRecoverUp()

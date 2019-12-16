@@ -15,7 +15,6 @@ var bnet = new Network();
        bnet.getBalanceBatch(watchAddresses).then((balanceInfo) => {
         res(balanceInfo);
        }).catch((err) => {
-         console.log('[Error]: caught error at check watch address balance');
          rej(err);
        })
     })
@@ -23,30 +22,34 @@ var bnet = new Network();
   }
   
   function checkUpdatedBalance(balanceInfo, old_balanceInfo){
-    if(balanceInfo.final_balance > old_balanceInfo.final_balance){
-      return true;
-    }
-    else{
-      return false;
-    }
+    return balanceInfo.final_balance > old_balanceInfo.final_balance
   }
 
-  
-  function getUpdatedRawTransactions(address, previousNumOfTransaction){
-      return new Promise((res, rej) => {
-          bnet.getAddressTxs(address, previousNumOfTransaction).then((rawTransactions) => {
-                res(rawTransactions);
-            }).catch((err) => {
-              console.log('[Error]: find error at get address new Transaction for ' + address);
-              rej(err);
-            })
+  async function getUpdatedTransactionsUp(address, previousNumOfTransaction){
+    return new Promise((res, rej) => {
+      bnet.getVaildTx(address, previousNumOfTransaction).then((txsList) => {
+            res(txsList);
+        }).catch((err) => {
+          rej(err);
       })
-    
+    })
+  }
+
+  function getTxInputs(rawInputs){
+    var resInputs = []
+    rawInputs.forEach((rawInput) => {
+      var script = Buffer.from(rawInput.script, 'hex')
+      var input = rawInput
+      input.script = script
+      resInputs.push(input)
+    })
+    return resInputs
   }
 
   module.exports = {
     getWatchAddresses: getWatchAddresses,
     getThisMonentBanalce: getThisMonentBanalce,
     checkUpdatedBalance: checkUpdatedBalance,
-    getUpdatedRawTransactions: getUpdatedRawTransactions
+    getUpdatedTransactionsUp: getUpdatedTransactionsUp,
+    getTxInputs:getTxInputs,
   }

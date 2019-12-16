@@ -13,6 +13,7 @@ var bnet=new Network();
 
 var g_utxos = null
 
+// TODO: 添加最低发送金额
 const sendMsgBtn=document.getElementById('send-message');
 sendMsgBtn.addEventListener('click',()=>{
     const msgpath=document.getElementById('msgpath').value;

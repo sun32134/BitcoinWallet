@@ -106,5 +106,5 @@ module.exports={
     decodeMessage,
     sleep,
     calculateNumberofUTXOWeNeed,
-    sortUtxos
+    sortUtxos,
 }
