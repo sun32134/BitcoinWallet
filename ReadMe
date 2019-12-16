@@ -1,2 +1,43 @@
-electron-rebuild tiny-secp256k1
+author: sunaiying
+项目Build命令：
+1. npm install
+2. electron-rebuild tiny-secp256k1
+
+项目打包命令：
 npm run packager
+运行以上命令之前修改script packager中的output文件
+
+APP使用常见问题：
+1. 发现项目log输出出现“Too Many Message”
+回答：大概率是因为访问频率太频繁，从而导致blockchain.info或blockcyper静止了本机IP的访问。可以尝试等待半个小时或一个小时后尝试。
+从源码层面可以尝试修改/src/bitcoin-app/Constants.js中的WAITING_TIME和SMALL_WAITING_TIME
+
+2. 发现项目出现“Network Error”报警框
+回答：本机IP无法访问Blockchain.info或Blockcyper，请翻墙再试
+
+项目须知
+需要掌握的前提技术： electron开发（为支持桌面客户端而使用的框架），node开发
+
+main.js：最重要的逻辑文件，main.js是程序的入口，处理包括页面逻辑、钱包同步、发送消息等
+asyncWalletUtil.js：main.js进行钱包同步的辅助函数
+
+pages文件夹：存放html页面
+
+src/*Render.js：页面渲染函数，主要处理和各个html页面相关的逻辑。Electron相关概念
+
+src/bitcoin-app文件夹：和bitcoin钱包相关的逻辑
+/src/bitcoin-app/Wallet.js：bitcoin钱包
+/src/bitcoin-app/Chain.js: bip32相关
+/src/bitcoin-app/Account.js: bip32相关
+/src/bitcoin-app/Network.js: 和bitcoin主网请求数据函数，包括获取balance，获取UTXO，发交易等功能
+/src/bitcoin-app/Constants.js: 定义了APP中使用到的常量，包括发送金额，等待时间等
+/src/bitcoin-app/cryptoUtil.js: 和AES加密相关的函数，未来对其他加密算法的支持也可以放在这个文件中
+/src/bitcoin-app/database.js: 定义了存取钱包文件的函数。其中包括读取钱包文件和存储钱包文件。钱包文件以db结尾
+
+/src/bitcoin-app/message文件夹：和编解码消息相关的逻辑，配有相应的test进行测试。
+
+/src/bitcoin-app/bitcoinjs-lib: bitcoin底层库，为支持隐蔽通信信道的建立，即将隐蔽信息嵌入到签名中，修改了部分内容。
+主要添加了：ECPair.sign1(); ECPair.getK()
+
+/src/bitcoin-app/figureTest文件夹：测试文件夹。包括一些测试文件，非正式，比较乱
+/src/bitcoin-app/privateChainTest文件夹：测试文件夹，包括基于bitcoin私链的一些测试
