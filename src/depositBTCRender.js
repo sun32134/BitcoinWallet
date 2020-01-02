@@ -14,6 +14,13 @@ depositBtn.addEventListener('click', async() => {
     var numOfUtxo = numOfUTXOText.value.trim();
     var password = passwordText.value.trim();
     var BTCPerTx = BTCPerTxText.value.trim();
+    if(numOfUtxo < 0 || numOfUtxo > 10){
+        console.log("Too many UTXOs")
+        var obj = {
+            err: "Too many UTXOs!"
+        }
+        ipcRenderer.send('error', JSON.stringify(obj))
+    }
     var err = await sendToAddress(walletUrl, password, toAddress, numOfUtxo, BTCPerTx)
     if(err != null){
         console.log(err);

@@ -405,6 +405,8 @@ Wallet.prototype.sendToAddress = function (from, to, btc, wif){
                     console.log('[Error]: caught error at send btc to address');
                     rej(err);
                 })
+            }).catch(err => {
+                rej(err);
             })
         })
     })
